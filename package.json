@@ -1,0 +1,15 @@
+{
+  "name": "jrx",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "htmx": "^0.0.2"
+  }
+}
