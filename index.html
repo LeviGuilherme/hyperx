@@ -6,16 +6,8 @@
     <title>JRX Test</title>
     <!-- Load HTMX first -->
     <script src="https://unpkg.com/htmx.org@1.9.5"></script>
-    <!-- Then load JRX -->
-    <script src="./dist/jrx.js"></script>
-    <!-- Add a small script to debug -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, checking elements:');
-            console.log('HTMX loaded:', typeof htmx !== 'undefined');
-            console.log('Template exists:', !!document.querySelector('#users template'));
-        });
-    </script>
+    <!-- Then load HyperX (webpack bundle) - it will auto-initialize -->
+    <script src="./dist/hyperx.js"></script>
     <style>
         .user {
           padding: 8px;
@@ -32,19 +24,36 @@
 
     <h2>Users List</h2>
 
-    <!-- Use the template element directly as the target -->
+    <h3>Example 1: Template with Button</h3>
+    
+    <!-- Button targeting the template directly -->
     <button hx-get="https://jsonplaceholder.typicode.com/users" hx-target="#users-template">
         Load Users
     </button>
 
-    <!-- Template element with ID that will be used as the container for rendered content -->
+    <!-- Template element with ID that will be used for rendering content -->
     <template id="users-template">
         <div class="user">
             <strong>{{ name }}</strong> - {{ email }}
         </div>
+    </template>
+    
+    <h3>Example 2: Self-Loading Template</h3>
+    <!-- Template with HTMX attributes will auto-load on page load -->
+    <template id="posts-template" hx-get="https://jsonplaceholder.typicode.com/posts/1" hx-trigger="load">
+        <div class="post">
+            <h4>{{ title }}</h4>
+            <p>{{ body }}</p>
+        </div>
+    </template>
 
-        <div hx-if="empty" class="fallback">No users found.</div>
-        <div hx-if="error" class="fallback">Something went wrong.</div>
+    <h3>Example 3: Self-Loading Posts</h3>
+    <!-- Template with HTMX attributes will auto-load on page load -->
+    <template id="posts-template" hx-get="https://jsonplaceholder.typicode.com/posts" hx-trigger="load">
+        <div class="post">
+            <h4>{{ title }}</h4>
+            <p>{{ body }}</p>
+        </div>
     </template>
 
 </body>
