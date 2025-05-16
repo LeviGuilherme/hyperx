@@ -23,7 +23,7 @@ Think of HyperX as the perfect companion to HTMX, adding the extra functionality
 ## 📦 Installation
 
 ```bash
-npm install hyperx
+npm install hyperx-js
 ```
 
 Or include it directly in your HTML:
@@ -32,7 +32,7 @@ Or include it directly in your HTML:
 <!-- Load HTMX first -->
 <script src="https://unpkg.com/htmx.org@1.9.5"></script>
 <!-- Then load HyperX (it will auto-initialize) -->
-<script src="https://unpkg.com/hyperx@latest/dist/hyperx.js"></script>
+<script src="https://unpkg.com/hyperx-js@latest/dist/hyperx.js"></script>
 ```
 
 ## 🛠️ Usage

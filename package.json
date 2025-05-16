@@ -1,11 +1,39 @@
 {
-  "name": "hyperx",
+  "name": "hyperx-js",
   "version": "0.1.0",
+  "description": "A modular extension library for HTMX that enables JSON rendering, conditional content, and component systems",
+  "main": "dist/hyperx.js",
+  "types": "dist/hyperx.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development",
-    "serve": "npx http-server -o"
+    "serve": "npx http-server -o",
+    "prepublishOnly": "npm run build"
   },
+  "keywords": [
+    "htmx",
+    "json",
+    "template",
+    "rendering",
+    "components",
+    "frontend",
+    "web"
+  ],
+  "author": "Guilherme Levi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LeviGuilherme/hyperx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LeviGuilherme/hyperx/issues"
+  },
+  "homepage": "https://github.com/LeviGuilherme/hyperx",
   "devDependencies": {
     "@types/node": "^22.15.18",
     "ts-loader": "^9.5.1",
@@ -13,7 +41,8 @@
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4"
   },
-  "dependencies": {
-    "htmx": "^0.0.2"
-  }
+  "peerDependencies": {
+    "htmx.org": "^1.9.0"
+  },
+  "dependencies": {}
 }
