@@ -1,0 +1,25 @@
+/* Search box component styles */
+.search-box {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.search-input {
+  padding-right: 40px !important; /* Make room for the icon */
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef !important;
+}
+
+.search-input:focus {
+  background-color: #fff;
+  border-color: #4dabf7 !important;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25) !important;
+}
+
+.search-icon {
+  transition: color 0.2s;
+}
+
+.search-input:focus + .search-icon {
+  color: #4dabf7;
+}

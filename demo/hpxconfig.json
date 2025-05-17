@@ -14,6 +14,14 @@
         "open": true
     },
     "components": [
-        "user-card.hpx"
+        "user-card.hpx",
+        {
+            "name": "search-box",
+            "path": "search-box/search-box.hpx"
+        },
+        {
+            "name": "user-card",
+            "path": "user-card/user-card.hpx"
+        }
     ]
 }

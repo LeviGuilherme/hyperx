@@ -1,6 +1,7 @@
 <template>
   <div class="user-card">
     <style>
+      /* Component-specific styles that should override external CSS */
       .user-card {
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -11,14 +12,6 @@
       .user-card img {
         width: 100%;
         border-radius: 4px;
-      }
-      .user-card h3 {
-        margin: 8px 0;
-        color: #333;
-      }
-      .user-card p {
-        margin: 4px 0;
-        color: #666;
       }
     </style>
     

@@ -1,0 +1,35 @@
+/* External styles for user-card component */
+.user-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+}
+
+.user-card h3 {
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.user-card p {
+  font-size: 0.9em;
+  color: #7f8c8d;
+  margin: 4px 0;
+}
+
+.user-card button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background-color 0.2s;
+}
+
+.user-card button:hover {
+  background-color: #2980b9;
+}

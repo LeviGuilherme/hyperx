@@ -1,0 +1,55 @@
+<template>
+  <div class="search-box">
+    <style>
+      .search-box {
+        position: relative;
+        margin: 16px 0;
+      }
+      
+      .search-input {
+        width: 100%;
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        font-size: 1em;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      
+      .search-input:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+      
+      .search-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #7f8c8d;
+        pointer-events: none;
+      }
+    </style>
+    
+    <input 
+      type="text" 
+      class="search-input" 
+      placeholder="{{ placeholder || 'Search...' }}"
+      hx-get="{{ searchUrl }}"
+      hx-trigger="keyup changed delay:500ms, search"
+      hx-target="{{ target }}"
+      name="q"
+    >
+    <div class="search-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </div>
+  </div>
+</template>
+
+<script>
+  // Component logic can go here
+  console.log('Search box component initialized');
+</script>

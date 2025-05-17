@@ -25,10 +25,18 @@
 </head>
 <body>
   <h1>HyperX Component System Demo</h1>
-  
+
+  <search-box
+    hx-data='{"placeholder": "Search users..."}'
+    hx-trigger="keyup changed delay:500ms, search"
+    hx-target="#user-details">
+  </search-box>
+
+  <div id="user-details"></div>
+
   <div class="container">
     <!-- User Card Component -->
-    <user-card 
+    <user-card
       hx-data='{
         "id": 1,
         "name": "Leanne Graham",
@@ -40,7 +48,7 @@
     </user-card>
 
     <!-- Another instance with different data -->
-    <user-card 
+    <user-card
       hx-data='{
         "id": 2,
         "name": "Ervin Howell",

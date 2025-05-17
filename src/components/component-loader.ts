@@ -31,6 +31,25 @@ interface ComponentFile {
 }
 
 /**
+ * Component configuration can be a string or an object with name and path
+ */
+type ComponentConfig = 
+  | string 
+  | { 
+      name: string; 
+      path: string;
+      [key: string]: any; // Allow additional properties
+    };
+
+/**
+ * Normalized component configuration
+ */
+interface NormalizedComponentConfig {
+  name: string;
+  path: string;
+}
+
+/**
  * Loads and registers components from .hpx files
  */
 class ComponentLoader {
@@ -72,54 +91,167 @@ class ComponentLoader {
         await this.initialize();
       }
 
-      const fileName = componentName.endsWith('.hpx') ? componentName : `${componentName}.hpx`;
+      // Ensure the component has the correct extension
+      const normalizedName = componentName.endsWith('.hpx') ? componentName : `${componentName}.hpx`;
       
-      // Get the base URL for components
-      const config = configLoader.getConfig();
-      if (!config) {
-        const error = new Error('Configuration not loaded');
-        console.error('[HyperX]', error.message);
-        throw error;
-      }
-
-      // Use the resolved components directory from config
-      const filePath = joinPath(config.project.componentsDir, fileName);
+      // Get the component path and check if it's in a nested structure
+      const { path: filePath, isNested } = await this.getComponentPath(normalizedName);
+      console.log(`[HyperX] Loading component from: ${filePath} (${isNested ? 'nested' : 'flat'} structure)`);
       
-      console.log(`[HyperX] Loading component from: ${filePath}`);
+      // Get CSS path based on the component's structure
+      const cssPath = this.getAssetPath(normalizedName, 'css', isNested);
       
-      const response = await fetch(filePath, {
-        cache: 'no-cache',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
-      
-      if (!response.ok) {
-        const error = new Error(`HTTP error! status: ${response.status} for ${filePath}`);
-        console.error('[HyperX]', error.message);
-        throw error;
+      // Check if the component file exists
+      const componentExists = await this.fileExists(filePath);
+      if (!componentExists) {
+        throw new Error(`Component file not found at: ${filePath}`);
       }
       
-      const content = await response.text();
+      // Load component and CSS in parallel
+      const [componentResponse, cssContent] = await Promise.all([
+        fetch(filePath, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        }).then(r => r.ok ? r.text() : Promise.reject(new Error(`HTTP error! status: ${r.status}`))),
+        this.loadCSSFile(cssPath)
+      ]);
       
-      if (!content) {
-        const error = new Error(`Empty content for component: ${componentName}`);
-        console.error('[HyperX]', error.message);
-        throw error;
+      // Extract the component's style content
+      const styleMatch = componentResponse.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      const componentStyles = styleMatch ? styleMatch[1] : '';
+      
+      // Process and combine styles
+      const processedStyles = this.processStyles(normalizedName, componentStyles, cssContent);
+      
+      // Create the final content with processed styles
+      let finalContent = componentResponse;
+      if (styleMatch) {
+        // Replace existing style tag with processed styles
+        finalContent = componentResponse.replace(
+          /<style[^>]*>[\s\S]*?<\/style>/i,
+          `<style>\n${processedStyles}\n</style>`
+        );
+      } else if (processedStyles) {
+        // Add style tag if it doesn't exist
+        finalContent = `\n<style>\n${processedStyles}\n</style>\n` + componentResponse;
       }
       
-      const result = componentRegistry.registerComponent(componentName, content);
-      if (!result) {
-        console.error(`[HyperX] Failed to register component: ${componentName}`);
-        return false;
+      // Register the component with the processed content
+      const success = componentRegistry.registerComponent(normalizedName, finalContent);
+      if (success) {
+        console.log(`[HyperX] Successfully loaded component with styles: ${normalizedName}`);
+      } else {
+        console.error(`[HyperX] Failed to register component: ${normalizedName}`);
       }
       
-      return true;
+      return success;
     } catch (error) {
-      console.error(`[HyperX] Failed to load component ${componentName}:`, error);
+      console.error(`[HyperX] Error loading component ${componentName}:`, error);
       return false;
     }
+  }
+
+  /**
+   * Load a CSS file
+   */
+  private async loadCSSFile(cssPath: string): Promise<string | null> {
+    try {
+      console.log(`[HyperX] Loading CSS file: ${cssPath}`);
+      const response = await fetch(cssPath);
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log(`[HyperX] No CSS file found at: ${cssPath}`);
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return null;
+      }
+      return await response.text();
+    } catch (error) {
+      console.error(`[HyperX] Error loading CSS file ${cssPath}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Process and combine styles with proper scoping
+   */
+  private processStyles(componentName: string, componentStyles: string, externalStyles: string | null): string {
+    // Convert component name to a valid CSS class name
+    const componentClass = componentName.replace(/\.hpx$/i, '').toLowerCase();
+    const scopedSelector = `.${componentClass}`;
+    
+    // Process external styles first (lower priority)
+    let styles = externalStyles ? 
+      externalStyles
+        .replace(/([^{}]+){/g, (match: string, selectors: string) => {
+          // Skip @ rules
+          if (selectors.trim().startsWith('@')) return match;
+          // Add scoping to each selector
+          return selectors.split(',')
+            .map((s: string) => s.trim())
+            .filter((s: string) => s.length > 0)
+            .map((selector: string) => {
+              // Don't add scoping to :host or :root
+              if (selector.includes(':host') || selector.includes(':root')) {
+                return selector;
+              }
+              return `${scopedSelector} ${selector}`;
+            })
+            .join(', ');
+        }) + '\n\n' : '';
+    
+    // Add component styles (higher priority)
+    styles += componentStyles;
+    
+    return styles;
+  }
+
+  /**
+   * Check if a file exists at the given URL
+   */
+  private async fileExists(url: string): Promise<boolean> {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get the full path for a component file, checking both flat and nested structures
+   */
+  private async getComponentPath(componentName: string): Promise<{ path: string; isNested: boolean }> {
+    // Remove .hpx extension if present
+    const baseName = componentName.replace(/\.hpx$/i, '');
+    const flatPath = joinPath(this.componentsPath, `${baseName}.hpx`);
+    const nestedPath = joinPath(this.componentsPath, baseName, `${baseName}.hpx`);
+    
+    // First check if the nested structure exists
+    const nestedExists = await this.fileExists(nestedPath);
+    if (nestedExists) {
+      console.log(`[HyperX] Found component in nested structure: ${nestedPath}`);
+      return { path: nestedPath, isNested: true };
+    }
+    
+    // Fall back to flat structure
+    console.log(`[HyperX] Using flat structure for component: ${flatPath}`);
+    return { path: flatPath, isNested: false };
+  }
+
+  /**
+   * Get the path for a component's asset (like CSS)
+   */
+  private getAssetPath(componentName: string, extension: string, isNested: boolean): string {
+    const baseName = componentName.replace(/\.hpx$/i, '');
+    if (isNested) {
+      return joinPath(this.componentsPath, baseName, `${baseName}.${extension}`);
+    }
+    return joinPath(this.componentsPath, `${baseName}.${extension}`);
   }
 
   /**
@@ -128,44 +260,57 @@ class ComponentLoader {
   public async loadAllComponents(): Promise<void> {
     console.log('[HyperX] Starting to load all components');
     
-    if (!this.initialized) {
-      console.log('[HyperX] Initializing component loader...');
-      await this.initialize();
-    }
-
-    const config = configLoader.getConfig();
-    if (!config) {
-      const error = new Error('Configuration not loaded');
-      console.error('[HyperX]', error.message);
-      throw error;
-    }
-
-    if (!config.components || !Array.isArray(config.components)) {
-      console.warn('[HyperX] No components defined in config');
-      return;
-    }
-
-    console.log(`[HyperX] Loading ${config.components.length} components:`, config.components);
-    
     try {
-      const loadPromises = config.components.map((component: string) => {
-        console.log(`[HyperX] Loading component: ${component}`);
-        return this.loadComponent(component).then(success => {
-          if (success) {
-            console.log(`[HyperX] Successfully loaded component: ${component}`);
-          } else {
-            console.error(`[HyperX] Failed to load component: ${component}`);
-          }
-          return success;
-        });
-      });
+      if (!this.initialized) {
+        console.log('[HyperX] Initializing component loader...');
+        await this.initialize();
+      }
+
+      const config = configLoader.getConfig();
+      if (!config) {
+        throw new Error('Configuration not loaded');
+      }
+
+      // Support both array of strings and array of objects for component configuration
+      const components: NormalizedComponentConfig[] = (() => {
+        const comps: ComponentConfig[] = Array.isArray(config.components) ? config.components : [];
+        
+        return comps
+          .map(comp => {
+            if (typeof comp === 'string') {
+              return { name: comp, path: comp };
+            }
+            return { 
+              name: comp.name || comp.path || '',
+              path: comp.path || comp.name || ''
+            };
+          })
+          .filter((comp): comp is NormalizedComponentConfig => 
+            !!comp.name && !!comp.path
+          );
+      })();
       
+      if (components.length === 0) {
+        console.warn('[HyperX] No valid components specified in the configuration');
+        return;
+      }
+
+      console.log(`[HyperX] Loading ${components.length} components`);
+      
+      const loadPromises = components.map(component => 
+        this.loadComponent(component.path).catch(error => {
+          console.error(`[HyperX] Error loading component ${component.name}:`, error);
+          return false;
+        })
+      );
+
       const results = await Promise.all(loadPromises);
       const successCount = results.filter(Boolean).length;
-      console.log(`[HyperX] Loaded ${successCount}/${config.components.length} components successfully`);
       
-      if (successCount < config.components.length) {
-        throw new Error(`Failed to load ${config.components.length - successCount} components`);
+      console.log(`[HyperX] Successfully loaded ${successCount}/${components.length} components`);
+      
+      if (successCount < components.length) {
+        console.warn('[HyperX] Some components failed to load. Check the console for details.');
       }
     } catch (error) {
       console.error('[HyperX] Error loading components:', error);
