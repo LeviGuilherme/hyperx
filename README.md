@@ -20,6 +20,39 @@ Think of HyperX as the perfect companion to HTMX, adding the extra functionality
 - **🧩 Component System** - Create reusable UI components (coming soon)
 - **🔀 Conditional Rendering** - Show/hide elements based on conditions (coming soon)
 
+## 🛠️ IDE Support
+
+HyperX `.hpx` files are HTML templates with additional features. Here's how to get proper syntax highlighting and IntelliSense in your IDE:
+
+### VS Code
+
+1. Install the [HTMX extension](https://marketplace.visualstudio.com/items?itemName=phoenisx.cssvar)
+2. You can either:
+   - Copy the contents of [vscode-settings.json](vscode-settings.json) to your VS Code settings (File > Preferences > Settings > Open Settings (JSON))
+   - Or manually add these settings:
+
+```json
+{
+  "files.associations": {
+    "*.hpx": "html"
+  },
+  "emmet.includeLanguages": {
+    "hpx": "html"
+  }
+}
+```
+
+### WebStorm/IntelliJ
+
+1. Go to `File` > `Settings` > `Editor` > `File Types`
+2. In "Recognized File Types", select "HTML"
+3. In "Registered Patterns", add `*.hpx`
+4. Click "OK" to save
+
+### Other Editors
+
+Most modern editors allow you to associate `.hpx` files with HTML syntax highlighting. Look for "file associations" or "language modes" in your editor's settings.
+
 ## 📦 Installation
 
 ```bash
