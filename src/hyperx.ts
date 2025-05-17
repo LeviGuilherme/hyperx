@@ -16,12 +16,12 @@ import './common/initializer';
 /**
  * Initialize all HyperX extensions
  */
-export function initializeHyperX(): void {
+export async function initializeHyperX(): Promise<void> {
   console.log('[HyperX] Initializing all extensions');
   
   // Initialize core extensions
   setupConditionalRendering();
-  setupComponentSystem();
+  await setupComponentSystem();
   
   // Initialize common functionality
   setupJsonResponseHandling();

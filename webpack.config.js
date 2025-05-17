@@ -1,4 +1,5 @@
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/hyperx.ts',
@@ -13,6 +14,10 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      "path": false,
+      "fs": false
+    }
   },
   output: {
     filename: 'hyperx.js',
@@ -23,5 +28,24 @@ module.exports = {
       export: 'default'
     },
     globalObject: 'window',
+    publicPath: '/dist/'
+  },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'demo/components', to: 'components' },
+        { from: 'demo/hpxconfig.json', to: 'hpxconfig.json' },
+        { from: 'demo/index.html', to: 'index.html' },
+      ],
+    }),
+  ],
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'demo'),
+    },
+    compress: true,
+    port: 3000,
+    hot: true,
+    open: true,
   },
 };

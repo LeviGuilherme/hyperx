@@ -1,0 +1,19 @@
+{
+    "version": "1.0.0",
+    "project": {
+        "name": "HyperX Demo",
+        "description": "A demo project for HyperX",
+        "version": "1.0.0",
+        "author": "Your Name",
+        "license": "MIT",
+        "rootDir": ".",
+        "componentsDir": "./components"
+    },
+    "server": {
+        "port": 3000,
+        "open": true
+    },
+    "components": [
+        "user-card.hpx"
+    ]
+}

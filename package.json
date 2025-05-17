@@ -11,8 +11,8 @@
   ],
   "scripts": {
     "build": "webpack --mode production",
-    "dev": "webpack --mode development",
-    "serve": "npx http-server -o",
+    "dev": "webpack --mode development --watch",
+    "serve": "webpack serve --mode development",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -36,13 +36,14 @@
   "homepage": "https://github.com/LeviGuilherme/hyperx",
   "devDependencies": {
     "@types/node": "^22.15.18",
+    "copy-webpack-plugin": "^13.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.0.0",
     "webpack": "^5.90.3",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
   },
   "peerDependencies": {
     "htmx.org": "^1.9.0"
-  },
-  "dependencies": {}
+  }
 }
