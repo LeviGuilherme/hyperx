@@ -1,6 +1,6 @@
 {
   "name": "hyperx-js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A modular extension library for HTMX that enables JSON rendering, conditional content, and component systems",
   "main": "dist/hyperx.js",
   "types": "dist/hyperx.d.ts",
